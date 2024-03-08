@@ -576,7 +576,9 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			modeFlags.feature &&
 			(modeFlags.feature.draggable ||
 				(modeFlags.feature.coordinates &&
-					modeFlags.feature.coordinates.draggable));
+					modeFlags.feature.coordinates.draggable) ||
+				(modeFlags.feature.coordinates &&
+					modeFlags.feature.coordinates.resizable));
 
 		if (!draggable) {
 			return;
@@ -595,19 +597,20 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			modeFlags &&
 			modeFlags.feature &&
 			modeFlags.feature.coordinates &&
-			modeFlags.feature.coordinates.draggable &&
+			(modeFlags.feature.coordinates.draggable ||
+				modeFlags.feature.coordinates.resizable) &&
 			draggableCoordinateIndex !== -1
 		) {
 			this.setCursor(this.cursors.dragStart);
 
-			// With Maintained Shape
+			// With resizeable
 			if (modeFlags.feature.coordinates.resizable) {
 				this.dragCoordinateResizeFeature.startDragging(
 					selectedId,
 					draggableCoordinateIndex,
 				);
 			} else {
-				// Without with Maintained Shape
+				// Without with resizable being set
 				this.dragCoordinate.startDragging(selectedId, draggableCoordinateIndex);
 			}
 
@@ -724,6 +727,8 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 		) {
 			this.onFinish(this.selected[0]);
 		} else if (this.dragFeature.isDragging()) {
+			this.onFinish(this.selected[0]);
+		} else if (this.dragCoordinateResizeFeature.isDragging()) {
 			this.onFinish(this.selected[0]);
 		}
 
