@@ -39,6 +39,7 @@ type TerraDrawSelectModeKeyEvents = {
 
 type ModeFlags = {
 	feature?: {
+		validation?: (geometry: GeoJSONStoreFeatures) => boolean;
 		draggable?: boolean;
 		rotateable?: boolean;
 		scaleable?: boolean;
@@ -123,6 +124,9 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 	private scaleFeature!: ScaleFeatureBehavior;
 	private dragCoordinateResizeFeature!: DragCoordinateResizeBehavior;
 	private cursors: Required<Cursors>;
+	private validations: {
+		[mode: string]: (feature: GeoJSONStoreFeatures) => boolean;
+	} = {};
 
 	constructor(options?: TerraDrawSelectModeOptions<SelectionStyling>) {
 		super(options);
@@ -171,6 +175,18 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			5;
 
 		this.allowManualDeselection = options?.allowManualDeselection ?? true;
+
+		// Validations
+		if (options && options.flags && options.flags) {
+			for (const mode in options.flags) {
+				const feature = options.flags[mode].feature;
+				if (feature && feature.validation) {
+					this.validations[mode] = feature.validation as (
+						feature: GeoJSONStoreFeatures,
+					) => boolean;
+				}
+			}
+		}
 	}
 
 	selectFeature(featureId: FeatureId) {
@@ -300,6 +316,7 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 		// We allow for preventing deleting coordinates via flags
 		const properties = this.store.getPropertiesCopy(featureId);
 		const modeFlags = this.flags[properties.mode as string];
+		const validation = this.validations[properties.mode as string];
 
 		// Check if we can actually delete the coordinate
 		const cannotDelete =
@@ -349,6 +366,19 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 		} else {
 			// Remove coordinate from array
 			coordinates.splice(coordinateIndex, 1);
+		}
+
+		// Validate the new geometry
+		if (validation) {
+			const valid = validation({
+				id: featureId,
+				type: "Feature",
+				geometry,
+				properties,
+			});
+			if (!valid) {
+				return;
+			}
 		}
 
 		this.store.delete([...this.midPoints.ids, ...this.selectionPoints.ids]);
@@ -659,6 +689,8 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			return;
 		}
 
+		const validation = this.validations[properties.mode as string];
+
 		// Check if should rotate
 		if (
 			modeFlags &&
@@ -667,7 +699,7 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			this.canRotate(event)
 		) {
 			setMapDraggability(false);
-			this.rotateFeature.rotate(event, selectedId);
+			this.rotateFeature.rotate(event, selectedId, validation);
 			return;
 		}
 
@@ -679,7 +711,7 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			this.canScale(event)
 		) {
 			setMapDraggability(false);
-			this.scaleFeature.scale(event, selectedId);
+			this.scaleFeature.scale(event, selectedId, validation);
 			return;
 		}
 
@@ -693,19 +725,20 @@ export class TerraDrawSelectMode extends TerraDrawBaseSelectMode<SelectionStylin
 			this.dragCoordinateResizeFeature.drag(
 				event,
 				modeFlags.feature.coordinates.resizable,
+				validation,
 			);
 			return;
 		}
 
 		// Check if coordinate is draggable and is dragged
 		if (this.dragCoordinate.isDragging()) {
-			this.dragCoordinate.drag(event, canSelfIntersect);
+			this.dragCoordinate.drag(event, canSelfIntersect, validation);
 			return;
 		}
 
 		// Check if feature is draggable and is dragged
 		if (this.dragFeature.isDragging()) {
-			this.dragFeature.drag(event);
+			this.dragFeature.drag(event, validation);
 			return;
 		}
 
