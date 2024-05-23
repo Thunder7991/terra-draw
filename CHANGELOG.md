@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-alpha.67](https://github.com/JamesLMilner/terra-draw/compare/v0.0.1-alpha.66...v0.0.1-alpha.67) (2024-05-16)
+
+
+### Bug Fixes
+
+* remove trigger of onClick from contextmenu handler ([#251](https://github.com/JamesLMilner/terra-draw/issues/251)) ([a43bc0f](https://github.com/JamesLMilner/terra-draw/commit/a43bc0f457f38c6b5f3498334e4d9e688dc50553))
+
+### [0.0.1-alpha.66](https://github.com/JamesLMilner/terra-draw/compare/v0.0.1-alpha.65...v0.0.1-alpha.66) (2024-05-12)
+
+
+### Features
+
+* add a context to allow more complex validations when selecting/editing ([#246](https://github.com/JamesLMilner/terra-draw/issues/246)) ([d4f1270](https://github.com/JamesLMilner/terra-draw/commit/d4f1270293b7e8b025e9888a5035ade014a5d3a9))
+
+
+### Bug Fixes
+
+* attempt to fix tsc build issues with implemented abtract methods ([#249](https://github.com/JamesLMilner/terra-draw/issues/249)) ([e98a8d2](https://github.com/JamesLMilner/terra-draw/commit/e98a8d2cc8bd950b914851f390f2d1bdf52771e6))
+
+
+### Documentation
+
+* update documentation improvement issue template ([364963b](https://github.com/JamesLMilner/terra-draw/commit/364963b65c9b0444c65b5d3ec9c769fafb5f6fa8))
+* update issue templates to add chore and documentation improvement options ([749ebd5](https://github.com/JamesLMilner/terra-draw/commit/749ebd50740285bec37ffee1cae0cd8a30622871))
+
 ### [0.0.1-alpha.65](https://github.com/JamesLMilner/terra-draw/compare/v0.0.1-alpha.64...v0.0.1-alpha.65) (2024-05-03)
 
 
